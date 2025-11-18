@@ -11,7 +11,9 @@ A theatrical "hacking" simulator that pranks users with Hollywood-style visual e
 
 Visit the live demo: [Your-Demo-Link-Here]
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot1.png)
+![Screenshot](screenshot2.png)
+![Screenshot](screenshot3.png)
 
 ## ✨ Features
 
