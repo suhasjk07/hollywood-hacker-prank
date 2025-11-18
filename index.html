@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRITICAL SYSTEM ERROR</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        #cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #0f0;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            box-shadow: 0 0 10px #0f0;
+            animation: cursorPulse 1s infinite;
+        }
+
+        @keyframes cursorPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        .scanline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent 50%, rgba(0, 255, 0, 0.03) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            animation: scan 8s linear infinite;
+            z-index: 9999;
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(4px); }
+        }
+
+        .glitch {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 0, 0, 0.1);
+            opacity: 0;
+            pointer-events: none;
+            animation: glitch 2s infinite;
+            z-index: 9998;
+        }
+
+        @keyframes glitch {
+            0%, 90%, 100% { opacity: 0; }
+            91%, 93%, 95%, 97% { opacity: 1; }
+        }
+
+        .matrix {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
+        #container {
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+            max-height: 100vh;
+            overflow-y: auto;
+        }
+
+        .alert-banner {
+            background: #f00;
+            color: #fff;
+            text-align: center;
+            padding: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            animation: flashBanner 0.5s infinite;
+            border: 3px solid #fff;
+            margin-bottom: 20px;
+        }
+
+        @keyframes flashBanner {
+            0%, 100% { background: #f00; }
+            50% { background: #a00; }
+        }
+
+        .header {
+            text-align: center;
+            border: 3px solid #f00;
+            padding: 30px;
+            margin-bottom: 20px;
+            background: rgba(255, 0, 0, 0.1);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.5);
+            animation: headerPulse 1s infinite;
+        }
+
+        @keyframes headerPulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(255, 0, 0, 0.5); }
+            50% { box-shadow: 0 0 60px rgba(255, 0, 0, 0.8); }
+        }
+
+        .skull {
+            font-size: 80px;
+            margin-bottom: 10px;
+            animation: shake 0.5s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-5px) rotate(-5deg); }
+            75% { transform: translateX(5px) rotate(5deg); }
+        }
+
+        h1 {
+            font-size: 42px;
+            text-shadow: 0 0 20px #f00;
+            margin-bottom: 10px;
+            letter-spacing: 5px;
+            color: #f00;
+        }
+
+        .terminal {
+            background: #000;
+            border: 2px solid #0f0;
+            padding: 15px;
+            margin-bottom: 20px;
+            height: 250px;
+            overflow-y: auto;
+            box-shadow: inset 0 0 20px rgba(0, 255, 0, 0.2);
+            font-size: 13px;
+        }
+
+        .terminal::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        .terminal::-webkit-scrollbar-track {
+            background: #000;
+        }
+
+        .terminal::-webkit-scrollbar-thumb {
+            background: #0f0;
+            box-shadow: 0 0 5px #0f0;
+        }
+
+        .line {
+            margin: 3px 0;
+            opacity: 0;
+            animation: fadeIn 0.3s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        .error { color: #f00; text-shadow: 0 0 5px #f00; }
+        .warning { color: #ff0; text-shadow: 0 0 5px #ff0; }
+        .success { color: #0f0; text-shadow: 0 0 5px #0f0; }
+        .info { color: #0ff; text-shadow: 0 0 5px #0ff; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            border: 2px solid #0f0;
+            padding: 15px;
+            background: rgba(0, 255, 0, 0.05);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 0, 0.3), transparent);
+            animation: sweep 3s infinite;
+        }
+
+        @keyframes sweep {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .panel.danger {
+            border-color: #f00;
+            background: rgba(255, 0, 0, 0.05);
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .panel.danger::before {
+            background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.3), transparent);
+        }
+
+        .panel h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+            border-bottom: 1px solid currentColor;
+            padding-bottom: 5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #001a00;
+            border: 2px solid #0f0;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0f0, #0a0);
+            width: 0%;
+            transition: width 0.5s;
+            box-shadow: 0 0 15px #0f0;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-bar.danger .progress-fill {
+            background: linear-gradient(90deg, #f00, #a00);
+            border-color: #f00;
+            box-shadow: 0 0 15px #f00;
+        }
+
+        #countdown {
+            font-size: 56px;
+            text-align: center;
+            color: #f00;
+            text-shadow: 0 0 30px #f00;
+            margin: 20px 0;
+            animation: countPulse 0.5s infinite;
+            border: 3px solid #f00;
+            padding: 20px;
+            background: rgba(255, 0, 0, 0.1);
+        }
+
+        @keyframes countPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .blink {
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0; }
+        }
+
+        button {
+            background: #000;
+            color: #0f0;
+            border: 3px solid #0f0;
+            padding: 20px 40px;
+            font-family: 'Courier New', monospace;
+            font-size: 20px;
+            cursor: pointer;
+            display: block;
+            margin: 20px auto;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+        }
+
+        button:hover {
+            background: #0f0;
+            color: #000;
+            box-shadow: 0 0 40px #0f0;
+            transform: scale(1.05);
+        }
+
+        .reveal {
+            display: none;
+            text-align: center;
+            padding: 50px;
+            border: 3px solid #0f0;
+            background: rgba(0, 255, 0, 0.1);
+            margin: 20px 0;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
+        }
+
+        .reveal h2 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #0f0;
+            animation: rainbow 3s infinite;
+        }
+
+        @keyframes rainbow {
+            0%, 100% { color: #0f0; }
+            25% { color: #0ff; }
+            50% { color: #ff0; }
+            75% { color: #f0f; }
+        }
+
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 12px;
+        }
+
+        .loading-dots::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .satellite {
+            text-align: center;
+            font-size: 40px;
+            animation: satellite 3s linear infinite;
+        }
+
+        @keyframes satellite {
+            0% { transform: translateX(-50px) rotate(0deg); }
+            100% { transform: translateX(50px) rotate(360deg); }
+        }
+
+        .camera-feed {
+            width: 100%;
+            height: 150px;
+            background: #000;
+            border: 2px solid #f00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .camera-feed::before {
+            content: 'REC ●';
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #f00;
+            font-size: 16px;
+            animation: blink 1s infinite;
+        }
+
+        .accounts-list {
+            max-height: 120px;
+            overflow-y: auto;
+            background: #001a00;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #0f0;
+        }
+
+        .account-item {
+            padding: 5px;
+            margin: 3px 0;
+            background: rgba(255, 0, 0, 0.1);
+            border-left: 3px solid #f00;
+            animation: slideIn 0.5s;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .warning-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #000;
+            border: 4px solid #f00;
+            padding: 30px;
+            z-index: 10001;
+            box-shadow: 0 0 50px rgba(255, 0, 0, 0.8);
+            display: none;
+            animation: popIn 0.5s;
+        }
+
+        @keyframes popIn {
+            from { transform: translate(-50%, -50%) scale(0); }
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .warning-popup.show {
+            display: block;
+        }
+
+        .map-trace {
+            width: 100%;
+            height: 100px;
+            background: #001a00;
+            border: 2px solid #0f0;
+            position: relative;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .trace-line {
+            position: absolute;
+            height: 2px;
+            background: #0f0;
+            box-shadow: 0 0 10px #0f0;
+            animation: traceLine 2s infinite;
+        }
+
+        @keyframes traceLine {
+            0% { width: 0; left: 0; }
+            50% { width: 100%; left: 0; }
+            100% { width: 0; left: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div id="cursor"></div>
+    <div class="scanline"></div>
+    <div class="glitch"></div>
+    <canvas class="matrix"></canvas>
+
+    <div class="warning-popup" id="warningPopup">
+        <h2 style="color: #f00; margin-bottom: 20px;">⚠️ CRITICAL WARNING ⚠️</h2>
+        <p style="font-size: 18px;">UNAUTHORIZED ACCESS DETECTED</p>
+        <p style="font-size: 18px;">ALL SYSTEMS COMPROMISED</p>
+    </div>
+
+    <div id="container">
+        <div class="alert-banner blink">
+            🚨 SECURITY BREACH IN PROGRESS 🚨
+        </div>
+
+        <div class="header">
+            <div class="skull">💀</div>
+            <h1>⚠️ SYSTEM COMPROMISED ⚠️</h1>
+            <p style="font-size: 20px;">REMOTE ACCESS ESTABLISHED</p>
+        </div>
+
+        <div class="terminal" id="terminal"></div>
+
+        <div id="countdown" class="blink"></div>
+
+        <div class="grid">
+            <div class="panel danger">
+                <h3>📹 CAMERA ACCESS</h3>
+                <div class="camera-feed">
+                    📹
+                </div>
+                <p class="error">Status: <span class="blink">ACTIVE</span></p>
+                <p style="font-size: 11px;">Front Camera: RECORDING</p>
+                <p style="font-size: 11px;">Rear Camera: STANDBY</p>
+            </div>
+
+            <div class="panel danger">
+                <h3>🔓 ACCOUNTS COMPROMISED</h3>
+                <div class="progress-bar danger">
+                    <div class="progress-fill" id="accountProgress"></div>
+                </div>
+                <div class="accounts-list" id="accountsList"></div>
+                <p class="error">Passwords: <span id="pwdCount">0</span> EXTRACTED</p>
+            </div>
+
+            <div class="panel">
+                <h3>📡 DATA TRANSFER</h3>
+                <div class="satellite">🛰️</div>
+                <div class="data-item">
+                    <span>Upload Speed:</span>
+                    <span class="warning"><span id="uploadSpeed">0</span> MB/s</span>
+                </div>
+                <div class="data-item">
+                    <span>Files Copied:</span>
+                    <span class="error"><span id="filesCopied">0</span></span>
+                </div>
+                <div class="data-item">
+                    <span>Data Sent:</span>
+                    <span class="warning"><span id="dataSent">0</span> GB</span>
+                </div>
+            </div>
+
+            <div class="panel danger">
+                <h3>🌍 LOCATION TRACED</h3>
+                <div class="map-trace">
+                    <div class="trace-line" style="top: 30%;"></div>
+                    <div class="trace-line" style="top: 60%;"></div>
+                </div>
+                <div class="data-item">
+                    <span>IP Address:</span>
+                    <span class="error" id="ipAddr">Tracing<span class="loading-dots"></span></span>
+                </div>
+                <div class="data-item">
+                    <span>Location:</span>
+                    <span class="warning" id="location">Locating<span class="loading-dots"></span></span>
+                </div>
+                <div class="data-item">
+                    <span>GPS Coords:</span>
+                    <span class="info" id="coords">Calculating<span class="loading-dots"></span></span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3>💾 SYSTEM EXTRACTION</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="systemProgress"></div>
+                </div>
+                <div class="data-item">
+                    <span>OS:</span>
+                    <span id="os">Detecting<span class="loading-dots"></span></span>
+                </div>
+                <div class="data-item">
+                    <span>Browser:</span>
+                    <span id="browser">Scanning<span class="loading-dots"></span></span>
+                </div>
+                <div class="data-item">
+                    <span>Device:</span>
+                    <span id="device">Analyzing<span class="loading-dots"></span></span>
+                </div>
+            </div>
+
+            <div class="panel danger">
+                <h3>⚡ ROOT ACCESS</h3>
+                <div class="progress-bar danger">
+                    <div class="progress-fill" id="rootProgress"></div>
+                </div>
+                <p class="error">Admin Rights: GRANTED</p>
+                <p class="warning">Kernel Access: ENABLED</p>
+                <p class="success">Backdoor: INSTALLED</p>
+            </div>
+        </div>
+
+        <button id="stopBtn">⛔ EMERGENCY SHUTDOWN ⛔</button>
+
+        <div class="reveal" id="reveal">
+            <h2>😂 GOTCHA! 😂</h2>
+            <p style="font-size: 24px; margin: 20px 0; color: #0f0;">You've been pranked! Nothing was actually hacked.</p>
+            <p style="font-size: 18px; color: #ff0;">This was all just visual effects and theatrics!</p>
+            <p style="font-size: 16px; margin-top: 20px;">Share this with friends and watch them panic! 🎭</p>
+            <button onclick="location.reload()" style="margin-top: 30px;">🔄 Restart Prank</button>
+        </div>
+    </div>
+
+    <script>
+        // Custom cursor
+        const cursor = document.getElementById('cursor');
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        // Warning popup
+        setTimeout(() => {
+            document.getElementById('warningPopup').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('warningPopup').classList.remove('show');
+            }, 3000);
+        }, 2000);
+
+        // Matrix effect
+        const canvas = document.querySelector('.matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const chars = '01アイウエオカキクケコサシスセソタチツテトハックデータ侵入';
+        const fontSize = 14;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars[Math.floor(Math.random() * chars.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 50);
+
+        // Enhanced terminal messages
+        const terminal = document.getElementById('terminal');
+        const messages = [
+            { text: '> [INITIALIZING] Remote access protocol v5.7...', type: 'success', delay: 0 },
+            { text: '> [SCANNING] Network vulnerabilities... 47 FOUND', type: 'warning', delay: 600 },
+            { text: '> [EXPLOITING] Port 443, 80, 22, 8080... SUCCESS', type: 'success', delay: 1200 },
+            { text: '> [BYPASSING] Firewall encryption... COMPLETE', type: 'warning', delay: 1800 },
+            { text: '> [ERROR] Intrusion detection system triggered!', type: 'error', delay: 2400 },
+            { text: '> [DEPLOYING] Anti-detection countermeasures...', type: 'info', delay: 3000 },
+            { text: '> [ACCESSING] Root directory /etc/passwd...', type: 'success', delay: 3600 },
+            { text: '> [EXTRACTING] Browser cookies and session data...', type: 'warning', delay: 4200 },
+            { text: '> [DECRYPTING] Password vault... 89% COMPLETE', type: 'success', delay: 4800 },
+            { text: '> [ACTIVATING] Camera and microphone access...', type: 'error', delay: 5400 },
+            { text: '> [TRACING] GPS coordinates via cell tower triangulation...', type: 'info', delay: 6000 },
+            { text: '> [DOWNLOADING] Personal files and documents...', type: 'warning', delay: 6600 },
+            { text: '> [INSTALLING] Persistent backdoor malware...', type: 'error', delay: 7200 },
+            { text: '> [TRANSMITTING] Data to remote server 45.123.67.89...', type: 'success', delay: 7800 },
+            { text: '> [WARNING] System will reboot in 10 seconds!', type: 'error', delay: 8400 },
+            { text: '> [COVERING] Tracks and logs... SANITIZED', type: 'success', delay: 9000 }
+        ];
+
+        messages.forEach(msg => {
+            setTimeout(() => {
+                const line = document.createElement('div');
+                line.className = `line ${msg.type}`;
+                line.textContent = msg.text;
+                terminal.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight;
+            }, msg.delay);
+        });
+
+        // Progress bars animations
+        function animateProgress(id, maxTime) {
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 10 + 5;
+                if (progress > 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                }
+                document.getElementById(id).style.width = progress + '%';
+            }, maxTime / 20);
+        }
+
+        setTimeout(() => {
+            animateProgress('systemProgress', 8000);
+            animateProgress('rootProgress', 6000);
+            animateProgress('accountProgress', 7000);
+        }, 1000);
+
+        // File and data counters
+        let files = 0, data = 0, pwds = 0, speed = 0;
+        
+        const fileInterval = setInterval(() => {
+            files += Math.floor(Math.random() * 80) + 20;
+            document.getElementById('filesCopied').textContent = files;
+            if (files > 2000) clearInterval(fileInterval);
+        }, 400);
+
+        const dataInterval = setInterval(() => {
+            data += (Math.random() * 0.5).toFixed(2);
+            document.getElementById('dataSent').textContent = parseFloat(data).toFixed(2);
+            if (data > 15) clearInterval(dataInterval);
+        }, 500);
+
+        const pwdInterval = setInterval(() => {
+            pwds += Math.floor(Math.random() * 5) + 1;
+            document.getElementById('pwdCount').textContent = pwds;
+            if (pwds > 50) clearInterval(pwdInterval);
+        }, 600);
+
+        const speedInterval = setInterval(() => {
+            speed = (Math.random() * 50 + 100).toFixed(1);
+            document.getElementById('uploadSpeed').textContent = speed;
+        }, 800);
+
+        // Accounts list
+        const accounts = [
+            '📧 Gmail: acc***@gmail.com',
+            '🔵 Facebook: user***@fb.com',
+            '💼 LinkedIn: prof***@linked.in',
+            '📱 Instagram: @user***',
+            '🐦 Twitter: @handle***',
+            '💰 Banking: ****5678',
+            '🛒 Amazon: shop***@mail.com',
+            '🎮 Steam: gamer***'
+        ];
+
+        setTimeout(() => {
+            const accountsList = document.getElementById('accountsList');
+            accounts.forEach((acc, index) => {
+                setTimeout(() => {
+                    const item = document.createElement('div');
+                    item.className = 'account-item';
+                    item.textContent = `[BREACHED] ${acc}`;
+                    accountsList.appendChild(item);
+                }, index * 800);
+            });
+        }, 3000);
+
+        // Countdown timer
+        let countdown = 10;
+        const countdownEl = document.getElementById('countdown');
+        const countInterval = setInterval(() => {
+            countdownEl.textContent = `⚠️ SYSTEM REBOOT IN: ${countdown}s ⚠️`;
+            countdown--;
+            if (countdown < 0) {
+                clearInterval(countInterval);
+                countdownEl.textContent = '🔒 REBOOTING SYSTEM... 🔒';
+            }
+        }, 1000);
+
+        // System info
+        setTimeout(() => {
+            document.getElementById('os').textContent = navigator.platform;
+            document.getElementById('browser').textContent = navigator.userAgent.split(' ').slice(-2)[0];
+            document.getElementById('device').textContent = `${screen.width}x${screen.height}`;
+        }, 2000);
+
+        // Fake IP and location
+        setTimeout(() => {
+            const fakeIP = `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
+            const cities = ['New York', 'London', 'Tokyo', 'Paris', 'Sydney', 'Moscow', 'Dubai'];
+            const randomCity = cities[Math.floor(Math.random() * cities.length)];
+            
+            document.getElementById('ipAddr').textContent = fakeIP;
+            document.getElementById('location').textContent = randomCity;
+            document.getElementById('coords').textContent = 
+                `${(Math.random()*180-90).toFixed(4)}°, ${(Math.random()*360-180).toFixed(4)}°`;
+        }, 3000);
+
+        // Stop button
+        document.getElementById('stopBtn').addEventListener('click', function() {
+            document.getElementById('reveal').style.display = 'block';
+            document.getElementById('countdown').style.display = 'none';
+            this.style.display = 'none';
+            clearInterval(countInterval);
+            clearInterval(fileInterval);
+            clearInterval(dataInterval);
+            clearInterval(pwdInterval);
+            clearInterval(speedInterval);
+        });
+
+        // Auto-reveal after 18 seconds
+        setTimeout(() => {
+            if (document.getElementById('reveal').style.display !== 'block') {
+                document.getElementById('stopBtn').click();
+            }
+        }, 18000);
+
+        // Random screen shake
+        setInterval(() => {
+            if (Math.random() > 0.95) {
+                document.body.style.transform = `translate(${Math.random()*4-2}px, ${Math.random()*4-2}px)`;
+                setTimeout(() => {
+                    document.body.style.transform = 'translate(0, 0)';
+                }, 100);
+            }
+        }, 500);
+    </script>
+</body>
+</html>
