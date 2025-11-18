@@ -7,7 +7,7 @@ A theatrical "hacking" simulator that pranks users with Hollywood-style visual e
 
 ## 🎬 Demo
 
-Visit the live demo: [https://ih4cku.vercel.app/]
+Visit the live demo: [https://ulikeme.vercel.app/]
 
 ![Screenshot](screenshot1.png)
 ![Screenshot](screenshot2.png)
