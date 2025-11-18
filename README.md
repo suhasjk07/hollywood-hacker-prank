@@ -308,8 +308,8 @@ SOFTWARE.
 ## 📧 Contact
 
 **Project Creator**: [SUHAS J K]
-- GitHub: [@yourusername](https://github.com/suhasjk07)
-- Email: your.email@example.com
+- GitHub: [@suhasjk07](https://github.com/suhasjk07)
+- Email: suhasjk07@duck.com
 
 **Project Link**: [https://github.com/suhasjk07/hollywood-hacker-prank](https://github.com/suhasjk07/hollywood-hacker-prank)
 
